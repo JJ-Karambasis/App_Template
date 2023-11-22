@@ -1,0 +1,9 @@
+[submodule "code/dependencies/DirectXShaderCompiler"]
+	path = code/dependencies/DirectXShaderCompiler
+	url = https://github.com/microsoft/DirectXShaderCompiler.git
+[submodule "code/dependencies/Vulkan-Headers"]
+	path = code/dependencies/Vulkan-Headers
+	url = https://github.com/KhronosGroup/Vulkan-Headers.git
+[submodule "code/dependencies/googletest"]
+	path = code/dependencies/googletest
+	url = https://github.com/google/googletest.git

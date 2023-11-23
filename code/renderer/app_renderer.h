@@ -20,6 +20,13 @@ struct android_window_data {
     ANativeWindow* Window;
 };
 #elif defined(OS_OSX)
+
+#ifdef __OBJC__
+@class CAMetalLayer;
+#else
+typedef void CAMetalLayer;
+#endif
+
 struct osx_window_data {
     CAMetalLayer* Layer;
 };

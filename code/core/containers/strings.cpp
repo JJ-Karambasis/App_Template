@@ -213,6 +213,22 @@ string string::Concat(allocator* Allocator, const string& A, const string& B) {
     return string(Buffer, TotalSize);
 }
 
+string string::Concat(allocator* Allocator, const span<string>& Strings) {
+    uptr TotalSize = 0;
+    for(const string& Str : Strings) {
+        TotalSize += Str.Size;
+    }
+    char* Buffer = (char*)Allocator->Allocate((TotalSize+1)*sizeof(char));
+    char* BufferAt = Buffer;
+
+    for(const string& Str : Strings) {
+        Memory_Copy(BufferAt, Str.Str, Str.Size*sizeof(char));
+        BufferAt += Str.Size;
+    }
+    *BufferAt = 0;
+    return string(Buffer, TotalSize);
+}
+
 bool Str_Equals(const string& StrA, const string& StrB, str_case Casing) {
     if(StrA.Size != StrB.Size) return false;
 

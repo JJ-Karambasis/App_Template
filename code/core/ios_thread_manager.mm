@@ -23,7 +23,7 @@ static string IOS_Get_Bundle_Path(allocator* Allocator) {
     return {};
 }
 
-thread_context* thread_manager::Create(allocator* Allocator) {
+thread_manager* thread_manager::Create(allocator* Allocator) {
     ios_thread_manager* ThreadManager = new(Allocator) ios_thread_manager;
     ThreadManager->Allocator = Allocator;
     ThreadManager->ThreadMap = hashmap<u64, thread_context*>(Allocator);

@@ -220,6 +220,9 @@ file* Create_File(allocator* Allocator, const string& Path, u32 Flags) {
 #if defined(OS_IOS)
     scratch Scratch = Get_Scratch();
     ActualPath = string::Concat(&Scratch, thread_manager::Get_Bundle_Path(), Path);
+#elif defined(OS_OSX)
+    scratch Scratch = Get_Scratch();
+    ActualPath = string::Concat(&Scratch, {thread_manager::Get_Bundle_Path(), "Contents/Resources/", Path});
 #endif
 
     int FileDescriptor = Posix_Open_File_Descriptor(ActualPath, Flags);

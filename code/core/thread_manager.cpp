@@ -376,6 +376,12 @@ ios_thread_context* Create_Thread_Context_Raw(ios_thread_manager* ThreadManager,
 
 #ifdef __OBJC__
 #include "ios_thread_manager.mm"
+#else
+thread_manager* thread_manager::Create(allocator* Allocator) {
+    //Need to support apps that don't interface with OBJC like libraries
+    Not_Implemented();
+    return nullptr;
+}
 #endif
 
 string thread_manager::Get_Bundle_Path() {
@@ -503,6 +509,13 @@ osx_thread_context* Create_Thread_Context_Raw(osx_thread_manager* ThreadManager,
 
 #ifdef __OBJC__
 #include "osx_thread_manager.mm"
+#else
+thread_manager* thread_manager::Create(allocator* Allocator) {
+    //TODO: Need to still support console apps on mac that are bundled and apps that
+    //are not bundled like internal project tools
+    Not_Implemented();
+    return nullptr;
+}
 #endif
 
 string thread_manager::Get_Bundle_Path() {

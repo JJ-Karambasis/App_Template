@@ -5,6 +5,7 @@
         "system_error": "cpp",
         "typeindex": "cpp",
         "xlocale": "cpp",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "iosfwd": "cpp"
     }
 }

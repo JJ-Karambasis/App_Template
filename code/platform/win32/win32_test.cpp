@@ -2,6 +2,9 @@
 #include "win32_shared.cpp"
 
 int main(int ArgCount, char* Args[]) {
+    core::Create();
+
+    
     win32_test_context TestContext = {};
     WNDCLASSEXW WindowClass = {
         .cbSize = sizeof(WNDCLASSEXW),

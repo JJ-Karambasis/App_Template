@@ -31,6 +31,7 @@ struct string {
     const char& operator[](uptr Index) const;
 
     static string Concat(allocator* Allocator, const string& A, const string& B);
+    static string Concat(allocator* Allocator, const span<string>& Strings);
 };
 
 bool Str_Equals(const string& StrA, const string& StrB, str_case Casing);

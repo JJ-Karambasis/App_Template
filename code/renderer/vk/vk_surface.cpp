@@ -76,7 +76,18 @@ bool vk_renderer::Create_Surface(void* WindowData) {
         return false;
     }
 #elif defined(VK_USE_PLATFORM_METAL_EXT)
-#error Not Implemented
+    osx_window_data* OSX = (osx_window_data*)WindowData;
+    
+    VkMetalSurfaceCreateInfoEXT CreateInfo = {
+        .sType  = VK_STRUCTURE_TYPE_METAL_SURFACE_CREATE_INFO_EXT,
+        .pLayer = OSX->Layer
+    };
+    
+    Assert(InstanceFuncs->MetalSurfaceEXT.Enabled, "Metal surface is not available!");
+    
+    if(InstanceFuncs->MetalSurfaceEXT.vkCreateMetalSurfaceEXT(Instance, &CreateInfo, VK_Get_Allocator(), &Surface) != VK_SUCCESS) {
+        return false;
+    }
 #else
 #error Not Implemented
 #endif

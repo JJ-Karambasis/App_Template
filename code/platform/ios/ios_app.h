@@ -5,10 +5,13 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#include <shared/audiotoolbox/audiotoolbox.h>
+
 struct ios_context : public app_platform {
-    arena Arena;
+    arena          Arena;
     app_renderer*  Renderer;
     app*           App;
+    audio_toolbox* AudioToolbox;
 };
 
 @interface ios_view : UIView

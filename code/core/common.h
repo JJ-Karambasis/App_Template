@@ -180,7 +180,6 @@ struct function_invoker : public function_invoker_base<return_type, args...>{
 };
 
 /// @brief: The main function invoker class
-/// @tparam functor: The function object that contains the captured variables and callback
 /// @tparam return_type: The function callback return type
 /// @tparam ...args: The additional arguments to specify for the custom function
 template <typename return_type, typename... args>

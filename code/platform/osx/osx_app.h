@@ -5,6 +5,8 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#include <shared/audiotoolbox/audiotoolbox.h>
+
 struct osx_context : public app_platform {
     arena Arena;
 };

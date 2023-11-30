@@ -13,7 +13,7 @@ void* arena::Push(uptr Size, uptr Alignment, allocate_clear ClearFlag) {
             BlockSize = LastBlock->Size*2;
         }
 
-        u32 Mask = Alignment-1;
+        uptr Mask = Alignment-1;
 
         //If the block size still doesn't handle the allocation, round the block up to the nearest pow2
         if(BlockSize < (Size+Mask)) {

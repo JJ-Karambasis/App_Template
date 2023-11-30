@@ -10,6 +10,14 @@
             "type": "cppvsdbg",
             "program": "${workspaceFolder}/build/vs/2022/x64/debug/win32_app.exe",
             "cwd": "${workspaceFolder}/data"
+        },
+        {
+            "name": "Launch OSX",
+            "request": "launch",
+            "type": "cppdbg",
+            "program": "${workspaceFolder}/build/xcode/Build/Products/debug/osx-app.app",
+            "cwd": "${workspaceFolder}/data",
+            "MIMode": "lldb",
         }
     ]
 }

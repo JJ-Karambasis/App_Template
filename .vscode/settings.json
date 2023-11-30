@@ -11,6 +11,9 @@
         "algorithm": "cpp",
         "limits": "cpp",
         "utility": "cpp",
-        "xutility": "cpp"
+        "xutility": "cpp",
+        "ios": "cpp",
+        "__config": "cpp",
+        "__nullptr": "cpp"
     }
 }

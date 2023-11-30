@@ -353,7 +353,8 @@ void ios_thread_context::Delete() {
     ThreadManager->Delete_Thread_Context(this);
 }
 
-ios_thread_context* Create_Thread_Context_Raw(ios_thread_manager* ThreadManager, u64 ThreadID) {    
+ios_thread_context* Create_Thread_Context_Raw(thread_manager* _ThreadManager, u64 ThreadID) {
+    ios_thread_manager* ThreadManager = (ios_thread_manager*)_ThreadManager;
     ios_thread_context* Result = ThreadManager->Create_Thread_Context();
     Result->ThreadID = ThreadID;
     ThreadManager->Mutex.Lock();
@@ -486,7 +487,8 @@ void osx_thread_context::Delete() {
     ThreadManager->Delete_Thread_Context(this);
 }
 
-osx_thread_context* Create_Thread_Context_Raw(osx_thread_manager* ThreadManager, u64 ThreadID) {    
+osx_thread_context* Create_Thread_Context_Raw(thread_manager* _ThreadManager, u64 ThreadID) {    
+    osx_thread_manager* ThreadManager = (osx_thread_manager*)_ThreadManager;
     osx_thread_context* Result = ThreadManager->Create_Thread_Context();
     Result->ThreadID = ThreadID;
     ThreadManager->Mutex.Lock();

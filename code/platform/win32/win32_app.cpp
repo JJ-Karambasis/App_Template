@@ -209,7 +209,7 @@ static int Win32_Run(HINSTANCE Instance) {
     shared_library* RendererLibrary = Create_Shared_Library(&Win32Context.Arena, String_Lit("app-renderer"));
     if(!RendererLibrary) {
         //TODO: Message box output for user. Inform them that app-renderer.dll is not available in the application directory
-        Log_Error(modules::Win32, "Failed to load the renderer library app-renderer.dll.");
+        Log_Error(modules::Win32, "Failed to load the renderer library app-renderer.dll");
         return 1;
     }
 

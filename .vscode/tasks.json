@@ -16,6 +16,29 @@
             }
         },
         {
+            "label": "Build OSX",
+            "type": "shell",
+            "osx": {
+                "command": "${workspaceFolder}/build/build.sh osx",
+                "problemMatcher": "$gcc",
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build iOS",
+            "type": "shell",
+            "osx": {
+                "command": "${workspaceFolder}/build/build.sh ios",
+                "problemMatcher": "$gcc",
+            },
+            "group": {
+                "kind": "build"
+            }
+        },
+        {
             "label": "Build Android",
             "type": "shell",
             "windows": {

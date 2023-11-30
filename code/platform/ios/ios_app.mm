@@ -37,7 +37,10 @@
 
     IOSContext.Renderer = App_Renderer_Create(core::Get(), &WindowData);
     IOSContext.App = App_Create(core::Get(), &IOSContext, IOSContext.Renderer);
+    IOSContext.AudioToolbox = Audio_Toolbox_Create(&IOSContext.Arena, IOSContext.App);
     
+    IOSContext.AudioToolbox->Start_Playing();
+
     DisplayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(doFrame:)];
     DisplayLink.preferredFramesPerSecond = 60;
     [DisplayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
@@ -75,4 +78,6 @@ int main(int ArgCount, char* Args[]) {
     }
 }
 
+#include <shared/audiotoolbox/audiotoolbox.cpp>
+#include <app_shared.cpp>
 #include <core.cpp>

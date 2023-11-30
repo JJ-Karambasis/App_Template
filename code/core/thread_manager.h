@@ -20,19 +20,6 @@ struct scratch : public temp_arena {
 struct thread_context;
 using thread_callback = function<s32(thread_context*)>;
 
-#ifdef OS_ANDROID
-struct android_activity {
-    JavaVM*        VM;
-    AAssetManager* AssetManager;
-    string         InternalDataPath;
-};
-
-struct android_thread_data {
-    JNIEnv*           Env;
-    android_activity* Activity;
-};
-#endif
-
 /// @brief: The base class for thread contexts. Contains the scratch memory, thread id, and thread callback function.
 /// For the main thread, no thread callback is used.
 struct thread_context {
@@ -51,9 +38,6 @@ struct thread_context {
     /// @brief: Static method to retrieve the thread context for the calling thread
     /// @return: The thread context for the calling thread
     static thread_context* Get();
-#ifdef OS_ANDROID
-    static android_thread_data Get_Android_Data();
-#endif
 private:
     static thread_local thread_context* s_ThreadContext;
 };
@@ -83,7 +67,7 @@ struct thread_manager {
 #endif
 
 #ifdef OS_ANDROID
-    static thread_manager* Create(allocator* Allocator, JavaVM* JavaVM, JNIEnv* JavaENV, AAssetManager* AssetManager, const char* InternalDataPath);
+    static thread_manager* Create(allocator* Allocator, ANativeActivity* Activity);
 #else
     /// @brief: Creates the thread manager while initializing the main thread context
     /// @brief: Create the thread manager while initializing the main thread context

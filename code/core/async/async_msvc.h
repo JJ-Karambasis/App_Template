@@ -17,7 +17,7 @@ struct atom32 {
     u32 Value;
 };
 
-inline u32 Atomic_Load(const atom32* Object) {
+inline u32 Atomic_Load(atom32* Object) {
     // Do a volatile load so that compiler doesn't duplicate loads
     return ((volatile atom32*)Object)->Value;
 }
@@ -48,36 +48,15 @@ struct atom64 {
 
 #if defined(ENVIRONMENT32)
 
-inline u64 Atomic_Load(const atom64* Object) {
-    // On 32-bit x86, the most compatible way to get an atomic 64-bit load is with
-    // cmpxchg8b.
-    u64 Result;
-    __asm {
-        mov esi, Object;
-        mov ebx, eax;
-        mov ecx, edx;
-        lock cmpxchg8b [esi];
-        mov dword ptr Result, eax;
-        mov dword ptr Result[4], edx;
-    }
-    return Result;
+inline u64 Atomic_Load(atom64* Object) {
+    return (u64)_InterlockedCompareExchange64((__int64*)&Object->Value, 0, 0);
 }
 
 inline void Atomic_Store(atom64* Object, u64 Value) {
-    // On 32-bit x86, the most compatible way to get an atomic 64-bit store is
-    // with cmpxchg8b.
-    // According to the Linux kernel (atomic64_cx8_32.S), we don't need the
-    // "lock;" prefix
-    // on cmpxchg8b since aligned 64-bit writes are already atomic on 586 and
-    // newer.
-    __asm {
-        mov esi, Object;
-        mov ebx, dword ptr Value;
-        mov ecx, dword ptr Value[4];
-    retry:
-        cmpxchg8b [esi];
-        jne retry;
-    }
+    u64 OldValue;
+    do {
+        OldValue = Object->Value;
+    } while(_InterlockedCompareExchange64((__int64*)&Object->Value, (__int64)Value, (__int64)OldValue) == OldValue);
 }
 
 inline bool Atomic_Compare_Exchange(atom64* Object, u64 OldValue, u64 NewValue) {
@@ -102,7 +81,7 @@ inline u64 Atomic_Decrement(atom64* Object) {
 
 #elif defined(ENVIRONMENT64)
 
-inline u64 Atomic_Load(const atom64* Object) {
+inline u64 Atomic_Load(atom64* Object) {
     // Do a volatile load so that compiler doesn't duplicate loads, which makes
     // them nonatomic. (Happened in testing.)
     return ((volatile atom64*) Object)->Value;

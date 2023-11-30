@@ -84,7 +84,8 @@ void win32_thread_context::Delete() {
     ThreadManager->Delete_Thread_Context(this);
 }
 
-win32_thread_context* Create_Thread_Context_Raw(win32_thread_manager* ThreadManager, u64 ThreadID) {    
+win32_thread_context* Create_Thread_Context_Raw(thread_manager* _ThreadManager, u64 ThreadID) {    
+    win32_thread_manager* ThreadManager = (win32_thread_manager*)_ThreadManager;
     win32_thread_context* Result = ThreadManager->Create_Thread_Context();
     Result->ThreadID = ThreadID;
     ThreadManager->Mutex.Lock();
@@ -177,7 +178,7 @@ struct android_thread_context : public thread_context {
 
 struct android_thread_manager : public thread_manager {
     android_thread_context Threads[MAX_THREAD_COUNT];
-    android_activity       Activity;
+    ANativeActivity*       Activity;
     u32                    FirstFreeIndex = (u32)-1;
     u32                    MaxUsed = 0;
 
@@ -205,15 +206,6 @@ struct android_thread_manager : public thread_manager {
     }
 };
 
-android_thread_data thread_context::Get_Android_Data() {
-    android_thread_context* ThreadContext = (android_thread_context*)thread_context::Get();
-    android_thread_manager* ThreadManager = (android_thread_manager*)thread_manager::Get();
-    return {
-        .Env = ThreadContext->Env,
-        .Activity = &ThreadManager->Activity
-    };
-}
-
 void android_thread_context::Delete() {
     if(Thread) {
         pthread_join(Thread, nullptr);
@@ -234,19 +226,15 @@ android_thread_context* Create_Thread_Context_Raw(android_thread_manager* Thread
     return Result;
 }
 
-thread_manager* thread_manager::Create(allocator* Allocator, JavaVM* JavaVM, JNIEnv* JavaENV, AAssetManager* AssetManager, const char* InternalDataPath) {
+thread_manager* thread_manager::Create(allocator* Allocator, ANativeActivity* Activity) {
     android_thread_manager* ThreadManager = new(Allocator) android_thread_manager;
     ThreadManager->Allocator = Allocator;
     ThreadManager->ThreadMap = hashmap<u64, thread_context*>(Allocator);
-    ThreadManager->Activity = {
-        .VM = JavaVM,
-        .AssetManager = AssetManager,
-        .InternalDataPath = string::Concat(Allocator, InternalDataPath, "/")
-    };
+    ThreadManager->Activity = Activity;
     ThreadManager->Mutex.Init();
 
     Set(ThreadManager);
-    ThreadManager->MainThreadContext = Create_Thread_Context_Raw(ThreadManager, Get_Current_Thread_ID(), JavaENV);
+    ThreadManager->MainThreadContext = Create_Thread_Context_Raw(ThreadManager, Get_Current_Thread_ID(), Activity->env);
     return ThreadManager;
 }
 
@@ -281,7 +269,7 @@ static void* Thread_Context_Callback(void* Parameter) {
     android_thread_context* ThreadContext = (android_thread_context*)Parameter;
     android_thread_manager* ThreadManager = (android_thread_manager*)thread_manager::Get();
 
-    JavaVM* JavaVM = ThreadManager->Activity.VM;
+    JavaVM* JavaVM = ThreadManager->Activity->vm;
     JavaVM->AttachCurrentThread(&ThreadContext->Env, nullptr);
 
     ThreadManager->Mutex.Lock();
@@ -584,10 +572,29 @@ thread_context* thread_manager::Create_Thread(const thread_callback& Function, v
 #endif
 
 thread_context* thread_manager::Get_Thread_Context() {
+    thread_context* Result = nullptr;
+
     u64 ThreadID = Get_Current_Thread_ID();
-    Mutex.Lock();
-    thread_context* Result = ThreadMap[ThreadID];
-    Mutex.Unlock();
+
+    {
+        Lock_Block(&Mutex); 
+        thread_context** pResult = ThreadMap.Get(ThreadID);
+        if(pResult) {
+            Result = *pResult;
+        }
+    }    
+
+    if(!Result) {
+#ifdef OS_ANDROID
+        android_thread_manager* ThreadManager = (android_thread_manager*)thread_manager::Get();
+        JNIEnv* Env;
+        ThreadManager->Activity->vm->GetEnv((void**)&Env, JNI_VERSION_1_6);
+        Result = Create_Thread_Context_Raw(ThreadManager, ThreadID, Env);
+#else
+        Result = Create_Thread_Context_Raw(thread_manager::Get(), ThreadID);
+#endif
+    }
+
     return Result;
 }
 

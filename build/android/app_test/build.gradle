@@ -8,12 +8,12 @@ android {
 
     defaultConfig {
         applicationId = 'com.example.app_test'
-        minSdkVersion 14
+        minSdkVersion 24
         targetSdkVersion 33
         externalNativeBuild {
             cmake {
                 abiFilters 'armeabi-v7a'
-                arguments '-DANDROID_STL=c++_static', '-DTEST_BUILD=1'
+                arguments '-DANDROID_STL=c++_shared', '-DTEST_BUILD=1'
             }
         }
     }
@@ -28,6 +28,9 @@ android {
             debuggable true
         }
     }
+    buildFeatures {
+        prefab true
+    }
     externalNativeBuild {
         cmake {
             path '../CMakeLists.txt'
@@ -41,4 +44,5 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.5.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation "androidx.startup:startup-runtime:1.0.0"
+    implementation 'com.google.oboe:oboe:1.8.0'
 }

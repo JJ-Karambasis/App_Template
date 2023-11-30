@@ -19,8 +19,26 @@ struct const_buffer {
 
     template <typename type, uptr N>
     inline const_buffer(const type (&Array)[N]) : Ptr((const u8*)Array), Size(sizeof(type)*N) { }
+
+    inline bool Is_Empty() const {
+        return !Size || !Ptr;
+    }
 };
 
+struct memory_stream {
+    const u8* Stream = nullptr;
+    size_t    Capacity = 0;
+    size_t    Used = 0;
+
+    memory_stream();
+    memory_stream(const const_buffer& Buffer);
+
+    const void* Consume(size_t Size);
+    u32         Consume_U32();
+    const void* Peek() const;
+    void        Skip(size_t Size);
+    bool        Is_Valid() const;
+};
 
 void* Memory_Copy(void* Dst, const void* Src, uptr Size);
 void* Memory_Clear(void* Memory, uptr Size);

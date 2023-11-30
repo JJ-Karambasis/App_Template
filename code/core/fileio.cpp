@@ -151,12 +151,13 @@ void file::Release() {
 
 file* Create_File(allocator* Allocator, const string& Path, u32 Flags) {
     bool UseInternalStorage = false;
+    android_thread_manager* ThreadManager = (android_thread_manager*)thread_manager::Get();
+    ANativeActivity* Activity = ThreadManager->Activity;
 
     if(Flags & file::Write_Flag) {
         UseInternalStorage = true;
     } else {
-        android_thread_data ThreadData = thread_context::Get_Android_Data();
-        AAsset* Asset = AAssetManager_open(ThreadData.Activity->AssetManager, Path.Str, AASSET_MODE_UNKNOWN);   
+        AAsset* Asset = AAssetManager_open(Activity->assetManager, Path.Str, AASSET_MODE_UNKNOWN);   
         if(!Asset) {
             UseInternalStorage = true;
         } else {
@@ -171,8 +172,7 @@ file* Create_File(allocator* Allocator, const string& Path, u32 Flags) {
     if(UseInternalStorage) {
         scratch Scratch = Get_Scratch();
         
-        android_thread_data ThreadData = thread_context::Get_Android_Data();
-        string FullPath = string::Concat(&Scratch, ThreadData.Activity->InternalDataPath, Path);
+        string FullPath = string::Concat(&Scratch, Activity->internalDataPath, Path);
 
         int FileDescriptor = Posix_Open_File_Descriptor(Path, Flags);
         if(FileDescriptor == -1) {

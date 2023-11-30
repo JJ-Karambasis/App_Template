@@ -82,8 +82,9 @@
 
 //Some generic macros
 #define Array_Count(arr) (sizeof((arr)) / sizeof((arr)[0]))
-#define Get_Min(a, b) ((a) < (b) ? (a) : (b))
-#define Get_Max(a, b) ((a) > (b) ? (a) : (b))
+#define Max(a, b) (((a) > (b)) ? (a) : (b))
+#define Min(a, b) (((a) < (b)) ? (a) : (b))
+#define Clamp(min, v, max) Min(Max(min, v), max)
 #define Abs(a) ((a) < 0 ? -(a) : (a))
 #define Is_Pow2(x) (((x) != 0) && (((x) & ((x) - 1)) == 0))
 #define Sign_Of(a) ((a < 0) ? -1 : 1)
@@ -134,7 +135,7 @@ struct core {
     log_manager*    LogManager;
 
 #ifdef OS_ANDROID
-    static core* Create(JavaVM* JavaVM, JNIEnv* JavaENV, AAssetManager* AssetManager, const char* InternalDataPath);
+    static core* Create(ANativeActivity* Activity);
 #else
     /// @brief: Creates the thread manager while initializing the main thread context
     /// @brief: Create the thread manager while initializing the main thread context

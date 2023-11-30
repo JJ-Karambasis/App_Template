@@ -57,6 +57,19 @@ inline u32 Safe_U32(u64 x) {
     return (u32)x;
 }
 
+inline f32 SNorm(s16 Value) {
+    return Clamp(-1.0f, (f32)Value / (f32)((1 << 15) - 1), 1.0f);
+}
+
+inline s16 SNorm_S16(f32 Value) {
+    s16 Result = (s16)(Clamp(-1.0f, Value, 1.0f) * (f32)(1 << 15));
+    return Result;
+}
+
+inline u32 Ceil_U32(f64 V) {
+    return (u32)ceil(V);
+}
+
 inline f32 Equal_Zero_Eps_Sq(f32 SqValue) {
     return Abs(SqValue) <= Sq(FLT_EPSILON);
 }
@@ -145,7 +158,7 @@ struct function_invoker : public function_invoker_base<return_type, args...>{
 
     /// @brief: Main constructor for a function invoker. Takes in a function object.
     /// @param _Functor: The function object to store.
-    inline function_invoker(const functor& _Functor) noexcept : Functor(_Functor) { }
+    inline function_invoker(const functor& _Functor) : Functor(_Functor) { }
 
     /// @brief: Executes the function object callback with all the required arguments
     /// @param ...Args: The additional arguments for the function callback
@@ -166,6 +179,37 @@ struct function_invoker : public function_invoker_base<return_type, args...>{
     function_invoker& operator=(const function_invoker&) = delete;
 };
 
+/// @brief: The main function invoker class
+/// @tparam functor: The function object that contains the captured variables and callback
+/// @tparam return_type: The function callback return type
+/// @tparam ...args: The additional arguments to specify for the custom function
+template <typename return_type, typename... args>
+struct function_invoker_args : public function_invoker_base<return_type, args...>{
+    return_type (*Functor)(args...);
+
+    /// @brief: Main constructor for a function invoker. Takes in a function object.
+    /// @param _Functor: The function object to store.
+    inline function_invoker_args(return_type (*_Functor)(args...)) : Functor(_Functor) { }
+
+    /// @brief: Executes the function object callback with all the required arguments
+    /// @param ...Args: The additional arguments for the function callback
+    /// @return: The return type for the function callback
+    inline return_type Invoke(args... Args) const final { return Functor(Args...); }
+
+    /// @brief: Clones the function invoker
+    /// @param Buffer: A buffer to hold small function callback data 
+    /// @return: A newly cloned function invoker
+    inline function_invoker_base<return_type, args...>* Clone(buffer* Buffer) const override {
+        function_invoker_base<return_type, args...>* Result = new(Buffer) function_invoker_args<return_type, args...>(Functor);
+        return Result;
+    }
+
+    /// @brief Function invoker destructor
+    virtual inline ~function_invoker_args() override { }
+
+    function_invoker_args& operator=(const function_invoker_args&) = delete;
+};
+
 /// @brief: The main concrete implementation for custom function callbacks with variable captures via functors
 /// @tparam return_type: The function callback return type
 /// @tparam ...args: The additional argument to specify for the custom function
@@ -179,6 +223,10 @@ struct function<return_type(args...)> {
 
     /// @brief: Base constructor
     inline function() : Buffer(Data, SMALL_DATA_SIZE) { }
+
+    inline function(return_type (*Functor)(args...)) : Buffer(Data, SMALL_DATA_SIZE) {
+        Invoker = new(&Buffer) function_invoker_args<return_type, args...>(Functor);
+    }
     
     /// @brief: Constructor with a custom functor object
     /// @tparam functor: The custom functor class defintion

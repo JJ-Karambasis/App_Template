@@ -35,7 +35,7 @@ void* heap::Allocate_Internal(uptr Size) {
         LastBlockSize = BlockSize;
 
         if(MinimumBlockSize != (uptr)-1) {
-            BlockSize = Get_Max(BlockSize, MinimumBlockSize);
+            BlockSize = Max(BlockSize, MinimumBlockSize);
         }
 
         Block = Create_Memory_Block(BlockSize);

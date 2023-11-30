@@ -652,7 +652,7 @@ bool vk_renderer::Create_Swapchain() {
     }
 
     //Max of 3 swapchain images
-    u32 MinImageCount = Get_Min(SurfaceCaps.maxImageCount, 3);
+    u32 MinImageCount = Min(SurfaceCaps.maxImageCount, 3);
 
     if (MinImageCount < 2) {
         Log_Error(modules::Vulkan, "Not enough images for the vulkan swapchain!");

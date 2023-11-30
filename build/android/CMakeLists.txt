@@ -16,6 +16,7 @@ include(${SCRIPT_PATH}/build_shaders.cmake)
 # Android libraries
 find_library(log-lib log)
 find_library(android-lib android)
+find_package (oboe REQUIRED CONFIG)
 link_libraries(${log-lib} ${android-lib})
 
 # Default compiler flags
@@ -66,10 +67,11 @@ else()
     # Copy libraries to android app libraries
     file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/jniLibs DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/app/src/main)
 
-    # Copy shaders to android app assets directory
+    # Copy assets to android app assets directory
     file(COPY ${DATA_PATH}/shaders DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/app/src/main/assets)
+    file(COPY ${DATA_PATH}/audio DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/app/src/main/assets)
 
 endif()
 
 target_include_directories(native-activity PRIVATE ${ANDROID_NDK}/sources/android/native_app_glue)
-target_link_libraries(native-activity android-native-app-glue)
+target_link_libraries(native-activity android-native-app-glue oboe::oboe)

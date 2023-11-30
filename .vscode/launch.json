@@ -4,6 +4,12 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [ // Launch app for debugging
-
+        {
+            "name": "Launch Win32",
+            "request": "launch",
+            "type": "cppvsdbg",
+            "program": "${workspaceFolder}/build/vs/2022/x64/debug/win32_app.exe",
+            "cwd": "${workspaceFolder}/data"
+        }
     ]
 }

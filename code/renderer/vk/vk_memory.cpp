@@ -2,7 +2,7 @@ struct vk_aligned_block {
     uptr ByteSize;
 };
 
-void* VKAPI_PTR VK_Alloc(void* UserData, uptr ByteSize, uptr Alignment, VkSystemAllocationScope AllocationScope) {
+static void* VKAPI_PTR VK_Alloc(void* UserData, uptr ByteSize, uptr Alignment, VkSystemAllocationScope AllocationScope) {
     Assert(Alignment > 0 && Is_Pow2(Alignment), "Alignment must be a power of 2");
 
     allocator* Allocator = allocator::Get_Default();
@@ -21,7 +21,7 @@ void* VKAPI_PTR VK_Alloc(void* UserData, uptr ByteSize, uptr Alignment, VkSystem
     return P2;
 }
 
-void* VKAPI_PTR VK_Realloc(void* UserData, void* Original, uptr Size, uptr Alignment, VkSystemAllocationScope AllocationScope) {
+static void* VKAPI_PTR VK_Realloc(void* UserData, void* Original, uptr Size, uptr Alignment, VkSystemAllocationScope AllocationScope) {
     if(!Original) return VK_Alloc(UserData, Size, Alignment, AllocationScope);
     Assert(Alignment > 0 && Is_Pow2(Alignment), "Alignment must be a power of 2");
     
@@ -39,14 +39,14 @@ void* VKAPI_PTR VK_Realloc(void* UserData, void* Original, uptr Size, uptr Align
     void** P2 = (void**)(((uptr)(P1) + Offset) & ~(Alignment - 1));
     P2[-1] = P1;
 
-    Memory_Copy(P2, Original, Get_Min(NewBlock->ByteSize, OriginalBlock->ByteSize));
+    Memory_Copy(P2, Original, Min(NewBlock->ByteSize, OriginalBlock->ByteSize));
 
     Allocator->Free(OriginalBlock);
 
     return P2;
 }
 
-void VKAPI_PTR VK_Free(void* UserData, void* Memory) {
+static void VKAPI_PTR VK_Free(void* UserData, void* Memory) {
     if(Memory) {
         allocator* Allocator = allocator::Get_Default();
         void* OriginalUnaligned = ((void**)Memory)[-1];

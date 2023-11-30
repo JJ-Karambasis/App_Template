@@ -3,5 +3,29 @@
     // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
+        {
+            "label": "Build Win32",
+            "type": "shell",
+            "windows": {
+                "command": "${workspaceFolder}/build/build.bat win32",
+                "problemMatcher": "$msCompile",
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build Android",
+            "type": "shell",
+            "windows": {
+                "command": "${workspaceFolder}/build/build.bat android",
+                "problemMatcher": "$gcc",
+            },
+            "command": "${workspaceFolder}/build/build.sh android",
+            "group": {
+                "kind": "build"
+            }
+        }
     ]
 } 

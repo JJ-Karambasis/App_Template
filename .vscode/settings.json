@@ -6,6 +6,11 @@
         "typeindex": "cpp",
         "xlocale": "cpp",
         "*.inc": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "random": "cpp",
+        "algorithm": "cpp",
+        "limits": "cpp",
+        "utility": "cpp",
+        "xutility": "cpp"
     }
 }

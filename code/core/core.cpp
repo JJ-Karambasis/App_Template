@@ -11,13 +11,13 @@
 core* core::s_Core = nullptr;
 
 #ifdef OS_ANDROID
-core* core::Create(JavaVM* JavaVM, JNIEnv* JavaENV, AAssetManager* AssetManager, const char* InternalDataPath) {
+core* core::Create(ANativeActivity* Activity) {
     static core Core;
     if(!Core.Allocator)
         Core.Allocator = allocator::Get_Default();
     
     if(!Core.ThreadManager)
-        Core.ThreadManager = thread_manager::Create(Core.Allocator, JavaVM, JavaENV, AssetManager, InternalDataPath);
+        Core.ThreadManager = thread_manager::Create(Core.Allocator, Activity);
     
     if(!Core.LogManager)
         Core.LogManager = log_manager::Create(Core.Allocator);

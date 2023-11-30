@@ -5,17 +5,23 @@ struct app;
 
 #include <core.h>
 #include <modules.h>
+
+#include "sound.h"
+
 #include <app_platform.h>
 #include <app_renderer.h>
 
 #define APP_UPDATE(name) void name(app* App)
+#define APP_MIX_SAMPLES(name) void name(app* App, sound_samples_f32* OutSamples)
 typedef APP_UPDATE(app_update);
+typedef APP_MIX_SAMPLES(app_mix_samples);
 
 struct app {
-    app_update*   Update;
-    app_platform* Platform;
-    app_renderer* Renderer;
-    arena         Arena;
+    app_update*      Update;
+    app_mix_samples* Mix_Samples;
+    app_platform*    Platform;
+    app_renderer*    Renderer;
+    arena            Arena;
 };
 
 #define APP_RELOAD(name) void name(app* App, core* Core)

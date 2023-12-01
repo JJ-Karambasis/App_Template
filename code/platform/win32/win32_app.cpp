@@ -1,7 +1,7 @@
 #include "win32_app.h"
 #include "win32_shared.cpp"
 
-static std::atomic_bool G_Running;
+static std::atomic_bool G_Running = true;
 
 static s32 Win32_Audio_Thread(thread_context* ThreadContext) {
 
@@ -266,7 +266,6 @@ static int Win32_Run(HINSTANCE Instance) {
 
 int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CmdLine, int CmdShow) {
     core::Create();
-    G_Running.store(true);
 
     __try {
         return Win32_Run(Instance);

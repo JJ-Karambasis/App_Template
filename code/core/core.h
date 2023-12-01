@@ -44,15 +44,6 @@
 
 #if defined(OS_OSX)
 #include <CoreFoundation/CoreFoundation.h>
-
-# ifdef __OBJC__
-#  if !defined(OS_IOS)
-#  import <AppKit/AppKit.h>
-#  else
-#  import <UIKit/UIKit.h>
-#  endif
-# endif
-
 #endif
 
 #if defined(COMPILER_MSVC)

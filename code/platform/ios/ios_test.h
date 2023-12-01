@@ -3,6 +3,7 @@
 
 #include <test.h>
 
+#import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
 struct ios_test_context : public test_context {

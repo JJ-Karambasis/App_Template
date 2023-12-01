@@ -216,19 +216,26 @@ void file::Release() {
 }
 
 file* Create_File(allocator* Allocator, const string& Path, u32 Flags) {
-    string ActualPath = Path;
-#if defined(OS_IOS)
+    int FileDescriptor = -1;
+
+#if defined(OS_OSX)
     scratch Scratch = Get_Scratch();
+
+    string ActualPath;
+# if defined(OS_IOS) 
     ActualPath = string::Concat(&Scratch, thread_manager::Get_Bundle_Path(), Path);
-#elif defined(OS_OSX)
-    scratch Scratch = Get_Scratch();
+# else
     ActualPath = string::Concat(&Scratch, {thread_manager::Get_Bundle_Path(), "Contents/Resources/", Path});
+# endif
+
+    FileDescriptor = Posix_Open_File_Descriptor(ActualPath, Flags);
 #endif
 
-    int FileDescriptor = Posix_Open_File_Descriptor(ActualPath, Flags);
-
     if(FileDescriptor == -1) {
-        return nullptr;
+        FileDescriptor = Posix_Open_File_Descriptor(Path, Flags);
+        if(FileDescriptor == -1) {
+            return nullptr;
+        }
     }
 
     posix_file* Result = new(Allocator) posix_file;

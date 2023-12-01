@@ -8,7 +8,6 @@
 struct audio_toolbox {
     AudioComponent Component;
     AudioComponentInstance Instance;
-    atom32 IsPlaying;
 
     void Start_Playing(); 
     void Stop_Playing();

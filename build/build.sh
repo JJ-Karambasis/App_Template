@@ -12,3 +12,10 @@ if [ "$1" = "ios" ]; then
         xcodebuild -quiet -scheme ios-app build
     popd
 fi
+
+if [ "$1" = "android" ]; then
+    export JAVA_HOME=/Applications/Android\ Studio.app/Contents/jbr/Contents/Home
+    pushd $Script_Path/android/
+        $Script_Path/android/gradlew assembleDebug
+    popd
+fi

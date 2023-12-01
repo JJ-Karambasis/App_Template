@@ -3,6 +3,7 @@
 
 #include <app.h>
 
+#import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 
 #include <shared/audiotoolbox/audiotoolbox.h>

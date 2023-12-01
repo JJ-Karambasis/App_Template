@@ -1,8 +1,6 @@
 #include "osx_app.h"
 #include "osx_shared.mm"
 
-static atom32 G_Running;
-
 @implementation osx_window_delegate
 - (BOOL)windowShouldClose:(NSWindow*)window {
     if(window == _mainWindow) {
@@ -20,6 +18,9 @@ static atom32 G_Running;
 int OSX_Run_Game() {
     osx_context OSXContext = {};
     OSXContext.Arena = arena(allocator::Get_Default());
+
+    [NSApplication sharedApplication];
+    Assert(NSApp != nil, "Invalid ns app!");
 
     osx_window_delegate* WindowDelegate = [[osx_window_delegate alloc] init];
     NSWindow* Window = OSX_Create_Window(1920, 1080, @"App", WindowDelegate);
@@ -97,7 +98,6 @@ int OSX_Run_Game() {
 
 int main(int ArgCount, char* Args[]) {
     core::Create();
-    Atomic_Store(&G_Running, true);
 
     int Result = 0;
     Result = OSX_Run_Game();

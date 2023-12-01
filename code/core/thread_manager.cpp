@@ -297,140 +297,6 @@ thread_context* thread_manager::Create_Thread(const thread_callback& Function, v
     return Result;
 }
 
-#elif defined(OS_IOS)
-
-struct ios_thread_context : public thread_context {
-    pthread_t Thread;
-    u32 Index = (u32)-1;
-    u32 NextIndex = (u32)-1;
-
-    virtual inline void Wait() override {
-        if(Thread) {
-            pthread_join(Thread, nullptr);
-        }
-    }
-
-    virtual void Delete() override;
-};
-
-struct ios_thread_manager : public thread_manager {
-    ios_thread_context Threads[MAX_THREAD_COUNT];
-    string             BundlePath;
-    u32                FirstFreeIndex = (u32)-1;
-    u32                MaxUsed = 0;
-
-    ios_thread_context* Create_Thread_Context() {
-        u32 Index;
-        if(FirstFreeIndex != (u32)-1) {
-            Index = FirstFreeIndex;
-            FirstFreeIndex = Threads[Index].NextIndex;
-        } else {
-            Assert(MaxUsed < MAX_THREAD_COUNT, "Thread overflow!");
-            Index = MaxUsed++;
-        }
-
-        ios_thread_context* ThreadContext = Threads + Index;
-        ThreadContext->NextIndex = (u32)-1;
-        ThreadContext->Index = Index;
-        
-        return ThreadContext;
-    }
-
-    void Delete_Thread_Context(ios_thread_context* Context) {
-        Context->NextIndex = FirstFreeIndex;
-        FirstFreeIndex = Context->Index;
-        Context->Index = (u32)-1;
-    }
-};
-
-void ios_thread_context::Delete() {
-    if(Thread) {
-        pthread_join(Thread, nullptr);
-    }
-    thread_context::Delete();
-
-    ios_thread_manager* ThreadManager = (ios_thread_manager*)thread_manager::Get();
-    ThreadManager->Delete_Thread_Context(this);
-}
-
-ios_thread_context* Create_Thread_Context_Raw(thread_manager* _ThreadManager, u64 ThreadID) {
-    ios_thread_manager* ThreadManager = (ios_thread_manager*)_ThreadManager;
-    ios_thread_context* Result = ThreadManager->Create_Thread_Context();
-    Result->ThreadID = ThreadID;
-    ThreadManager->Mutex.Lock();
-    ThreadManager->ThreadMap.Add(ThreadID, Result);
-    ThreadManager->Mutex.Unlock();
-    return Result;
-}
-
-#ifdef __OBJC__
-#include "ios_thread_manager.mm"
-#else
-thread_manager* thread_manager::Create(allocator* Allocator) {
-    //Need to support apps that don't interface with OBJC like libraries
-    Not_Implemented();
-    return nullptr;
-}
-#endif
-
-string thread_manager::Get_Bundle_Path() {
-    ios_thread_manager* ThreadManager = (ios_thread_manager*)ios_thread_manager::Get();
-    return ThreadManager->BundlePath;
-}
-
-void thread_manager::Wait_All() {
-    ios_thread_manager* ThreadManager = (ios_thread_manager*)Get();
-    for(u32 ThreadIndex = 0; ThreadIndex < MAX_THREAD_COUNT; ThreadIndex++) {
-        ios_thread_context* ThreadContext = ThreadManager->Threads + ThreadIndex;
-        if(ThreadContext->Index != (u32)-1) {
-            ThreadContext->Wait();
-        }
-    }
-}
-
-void thread_manager::Delete() {
-    ios_thread_manager* ThreadManager = (ios_thread_manager*)Get();
-
-    for(u32 ThreadIndex = 0; ThreadIndex < MAX_THREAD_COUNT; ThreadIndex++) {
-        ios_thread_context* ThreadContext = ThreadManager->Threads + ThreadIndex;
-        if(ThreadContext->Index != (u32)-1) {
-            ThreadContext->Delete();            
-        }
-    }
-
-    allocator* Allocator = ThreadManager->Allocator;
-    ThreadManager->ThreadMap.Release();
-    ThreadManager->Mutex.Release();
-    operator delete(ThreadManager, Allocator);
-}
-
-static void* Thread_Context_Callback(void* Parameter) {
-    ios_thread_context* ThreadContext = (ios_thread_context*)Parameter;
-    ios_thread_manager* ThreadManager = (ios_thread_manager*)thread_manager::Get();
-
-    ThreadManager->Mutex.Lock();
-    ThreadManager->ThreadMap.Add(Get_Current_Thread_ID(), ThreadContext);
-    ThreadManager->Mutex.Unlock();
-
-    s32 Result = ThreadContext->Callback(ThreadContext);
-
-    ThreadManager->Mutex.Lock();
-    ThreadManager->ThreadMap.Remove(Get_Current_Thread_ID());
-    ThreadManager->Mutex.Unlock();
-
-    return nullptr;
-}
-
-thread_context* thread_manager::Create_Thread(const thread_callback& Function, void* UserData) {
-    ios_thread_manager* ThreadManager = (ios_thread_manager*)thread_manager::Get();
-    ios_thread_context* Result = ThreadManager->Create_Thread_Context();
-    Result->Callback = Function;
-    Result->UserData = UserData;
-    if(pthread_create(&Result->Thread, NULL, Thread_Context_Callback, Result) != 0)
-        return nullptr;
-    return Result;
-}
-
 #elif defined(OS_OSX)
 
 struct osx_thread_context : public thread_context {
@@ -497,16 +363,44 @@ osx_thread_context* Create_Thread_Context_Raw(thread_manager* _ThreadManager, u6
     return Result;
 }
 
-#ifdef __OBJC__
-#include "osx_thread_manager.mm"
-#else
-thread_manager* thread_manager::Create(allocator* Allocator) {
-    //TODO: Need to still support console apps on mac that are bundled and apps that
-    //are not bundled like internal project tools
-    Not_Implemented();
-    return nullptr;
+static string OSX_Get_Bundle_Path(allocator* Allocator) {
+    // Get a reference to the main bundle
+    CFBundleRef MainBundle = CFBundleGetMainBundle();
+    if(MainBundle != nil) {
+        // Get a reference to the file's URL
+        CFURLRef ImageURL = CFBundleCopyBundleURL(MainBundle);
+
+        // Convert the URL reference into a string reference
+        CFStringRef ImagePath = CFURLCopyFileSystemPath(ImageURL, kCFURLPOSIXPathStyle);
+
+        // Convert the string reference into a C string
+        const char* Path = CFStringGetCStringPtr(ImagePath, kCFStringEncodingUTF8);
+        
+        //End with trailing slash since result is a path
+        string Result = string::Concat(Allocator, Path, "/");
+
+        CFRelease(ImagePath);
+        CFRelease(ImageURL);
+
+        return Result;
+    }
+
+    return {};
 }
-#endif
+
+thread_manager* thread_manager::Create(allocator* Allocator) {
+    osx_thread_manager* ThreadManager = new(Allocator) osx_thread_manager;
+    ThreadManager->Allocator = Allocator;
+    ThreadManager->ThreadMap = hashmap<u64, thread_context*>(Allocator);
+    ThreadManager->Mutex.Init();
+
+    ThreadManager->BundlePath = OSX_Get_Bundle_Path(Allocator);
+
+    Set(ThreadManager);
+    ThreadManager->MainThreadContext = Create_Thread_Context_Raw(ThreadManager, Get_Current_Thread_ID());
+    return ThreadManager;
+}
+
 
 string thread_manager::Get_Bundle_Path() {
     osx_thread_manager* ThreadManager = (osx_thread_manager*)thread_manager::Get();
@@ -567,8 +461,6 @@ thread_context* thread_manager::Create_Thread(const thread_callback& Function, v
 }
 
 #else
-
-
 
 # error Not Implemented
 #endif

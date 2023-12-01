@@ -4,9 +4,9 @@
 struct tracking_allocator : public allocator {
     allocator* Allocator = nullptr;
 
-    std::atomic_uint64_t TotalAllocated;
-    std::atomic_uint64_t TotalFreed;
-    std::atomic_uint64_t CurrentAllocated;
+    std::atomic_uint64_t TotalAllocated = 0;
+    std::atomic_uint64_t TotalFreed = 0;
+    std::atomic_uint64_t CurrentAllocated = 0;
 
     tracking_allocator();
     tracking_allocator(allocator* _Allocator);

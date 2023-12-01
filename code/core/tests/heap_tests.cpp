@@ -47,9 +47,8 @@ TEST(HeapTest, Heap) {
 
     Heap.Release();
 
-    // ASSERT_EQ(BaseAllocator.CurrentAllocated.Value == 0);
-    // ASSERT_EQ(BaseAllocator.TotalAllocated.Value == BaseAllocator.TotalFreed.Value);
-
+    ASSERT_EQ(BaseAllocator.CurrentAllocated, 0);
+    ASSERT_EQ(BaseAllocator.TotalAllocated, BaseAllocator.TotalFreed);
 
     Heap = test_heap(&BaseAllocator);
 
@@ -89,13 +88,10 @@ TEST(HeapTest, Heap) {
         {
             HEAP_FREE(ThirdBatchBlocks[i]);
         }
-
-        // ASSERT_EQ(HeapAllocator.CurrentAllocated.Value == 0);
-        // ASSERT_EQ(HeapAllocator.TotalAllocated.Value == HeapAllocator.TotalFreed.Value);
     }
 
     Heap.Release();
 
-    // ASSERT_EQ(BaseAllocator.CurrentAllocated.Value == 0);
-    // ASSERT_EQ(BaseAllocator.TotalAllocated.Value == BaseAllocator.TotalFreed.Value);
+    ASSERT_EQ(BaseAllocator.CurrentAllocated, 0);
+    ASSERT_EQ(BaseAllocator.TotalAllocated, BaseAllocator.TotalFreed);
 }

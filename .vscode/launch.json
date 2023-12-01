@@ -12,6 +12,13 @@
             "cwd": "${workspaceFolder}/data"
         },
         {
+            "name": "Launch Win32 Tests",
+            "request": "launch",
+            "type": "cppvsdbg",
+            "program": "${workspaceFolder}/build/vs/2022/x64/debug/win32_test.exe",
+            "cwd": "${workspaceFolder}/data"
+        },
+        {
             "name": "Launch OSX",
             "request": "launch",
             "type": "cppdbg",

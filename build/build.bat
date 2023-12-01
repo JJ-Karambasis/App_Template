@@ -7,7 +7,7 @@ FOR /F "tokens=* USEBACKQ" %%F IN (`"%ProgramFiles(x86)%\Microsoft Visual Studio
 )
 
 IF %1 == win32 (
-    "%MSBuildPath%" %BasePath%\build\vs\2022\app.sln /p:Configuration=Debug /p:Platform=x64
+    "%MSBuildPath%" %BasePath%\build\vs\2022\app.sln /p:Configuration=Debug /p:Platform=x64 /p:GenerateFullPaths=true /nologo
 )
 
 IF %1 == android (

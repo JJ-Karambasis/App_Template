@@ -1,14 +1,11 @@
 struct ArenaTest : public testing::Test {
 protected:
-    void SetUp() override {
-        Allocator = tracking_allocator(allocator::Get_Default());
-        Arena = arena(&Allocator);
-    }
+    ArenaTest() : Allocator(allocator::Get_Default()), Arena(&Allocator) { }
 
     void TearDown() override {
         Arena.Release();
-        // ASSERT_EQ(Allocator.CurrentAllocated.Value, 0);
-        // ASSERT_EQ(Allocator.TotalAllocated.Value, BaseAllocator.TotalFreed.Value);
+        ASSERT_EQ(Allocator.CurrentAllocated, 0);
+        ASSERT_EQ(Allocator.TotalAllocated, Allocator.TotalFreed);
     }
 
     tracking_allocator Allocator;

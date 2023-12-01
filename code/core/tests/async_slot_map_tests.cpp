@@ -6,17 +6,11 @@ struct slot_map_thread_entry {
     bool              Freed;
 };
 
-TEST_CASE("Async slot map") {
-    virtual_allocator VirtualAllocator;
-    tracking_allocator BaseAllocator(&VirtualAllocator);
-
+TEST(AsyncSlotMapTests, AsyncSlotMap) {
     const u32 NumWorkerThreads = 64;
     const u32 Batch = 1024*64;
 
-    thread_manager::Create(&BaseAllocator);
-    log_manager::Create(&BaseAllocator);
-
-    arena Arena(&BaseAllocator);
+    arena Arena(allocator::Get_Default());
 
     async_slot_map<u32> SlotMap(&Arena, NumWorkerThreads*Batch);
     array<slot_map_thread_entry> Entries(&Arena, NumWorkerThreads*Batch);
@@ -63,7 +57,7 @@ TEST_CASE("Async slot map") {
                 Entry.Handle = SlotMap.Allocate();
                 Entry.AllocateThreadID = Get_Current_Thread_ID();
 
-                REQUIRE(!Entry.Handle.Is_Null());
+                EXPECT_FALSE(Entry.Handle.Is_Null());
 
                 Atomic_Fence_Rel();
 
@@ -77,14 +71,9 @@ TEST_CASE("Async slot map") {
     thread_manager::Wait_All();
 
     //We have to push to get free entries first, so we always have twice as many push counts
-    REQUIRE(SlotMap.FreeIndices.Stats.PushCount.Value == SlotMap.FreeIndices.Stats.PopCount.Value*2);
-    REQUIRE(SlotMap.Stats.AllocatedCount.Value == SlotMap.Stats.FreedCount.Value);
-    REQUIRE(SlotMap.Slots.Count == SlotMap.Stats.AllocatedCount.Value);
+    ASSERT_EQ(SlotMap.FreeIndices.Stats.PushCount.Value, SlotMap.FreeIndices.Stats.PopCount.Value*2);
+    ASSERT_EQ(SlotMap.Stats.AllocatedCount.Value, SlotMap.Stats.FreedCount.Value);
+    ASSERT_EQ(SlotMap.Slots.Count, SlotMap.Stats.AllocatedCount.Value);
 
     Arena.Release();
-    log_manager::Flush_And_Delete();
-    thread_manager::Delete();
-
-    REQUIRE(BaseAllocator.CurrentAllocated.Value == 0);
-    REQUIRE(BaseAllocator.TotalAllocated.Value == BaseAllocator.TotalFreed.Value);
 }

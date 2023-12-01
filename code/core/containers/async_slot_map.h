@@ -1,7 +1,6 @@
 #ifndef ASYNC_SLOT_MAP_H
 #define ASYNC_SLOT_MAP_H
 
-//TODO: Atomic stores here
 struct async_stack_index {
     static const u32 INVALID_INDEX = (u32)-1;
     union stack_index {
@@ -26,7 +25,7 @@ struct async_stack_index {
     array<u32>   Indices;
     stack_index  Top;
 
-#ifdef ASYNC_SLOT_MAP_STATS
+#ifdef DEBUG_BUILD
     struct {
         atom32 PushCount;
         atom32 PopCount;
@@ -49,7 +48,7 @@ struct async_stack_index {
             }
         }
 
-#ifdef ASYNC_SLOT_MAP_STATS
+#ifdef DEBUG_BUILD
         Atomic_Increment(&Stats.PushCount);
 #endif
     }
@@ -66,7 +65,7 @@ struct async_stack_index {
             stack_index NewTop(Next, CurrentTop.Key.Value+1);
 
             if(Atomic_Compare_Exchange(&Top.ID, CurrentTop.ID.Value, NewTop.ID.Value)) {
-#ifdef ASYNC_SLOT_MAP_STATS
+#ifdef DEBUG_BUILD
                 Atomic_Increment(&Stats.PopCount);
 #endif
                 return Result;
@@ -89,6 +88,8 @@ union async_slot_id {
         atom32 Generation;
     };
 
+    inline async_slot_id() { }
+
     inline async_slot_id(u32 _Index, u32 _Generation) {
         Atomic_Store(&Index, _Index);
         Atomic_Store(&Generation, _Generation);
@@ -107,8 +108,8 @@ struct async_handle {
         Atomic_Store(&ID.ID, _ID);
     }
 
-    inline bool Is_Null() const { return Atomic_Load(&ID.ID) == 0; }
-    inline u32 Get_Index() const { return Atomic_Load(&ID.Index); }
+    inline bool Is_Null() { return Atomic_Load(&ID.ID) == 0; }
+    inline u32 Get_Index() { return Atomic_Load(&ID.Index); }
 };
 
 template <typename type>
@@ -117,7 +118,7 @@ struct async_slot_map {
     array<async_slot_id> Slots;
     async_stack_index    FreeIndices;
 
-#ifdef ASYNC_SLOT_MAP_STATS
+#ifdef DEBUG_BUILD
     struct {
         atom32 AllocatedCount;
         atom32 FreedCount;
@@ -136,7 +137,7 @@ struct async_slot_map {
     inline bool Is_Allocated(async_handle<type> Handle) {
         if(Handle.Is_Null()) return false;
         u32 Index = Handle.Get_Index();
-        return Handle.ID.Generation == Slots[Index].Generation;
+        return Handle.ID.Generation.Value == Slots[Index].Generation.Value;
     }
 
     inline async_handle<type> Allocate() {
@@ -145,7 +146,7 @@ struct async_slot_map {
             return {};
         }
         
-#ifdef ASYNC_SLOT_MAP_STATS
+#ifdef DEBUG_BUILD
         Atomic_Increment(&Stats.AllocatedCount);
 #endif
         return async_handle<type>(Slots[Index]);
@@ -155,13 +156,13 @@ struct async_slot_map {
         if(Handle.Is_Null()) return;
 
         u32 Index = Handle.Get_Index();
-        if(Handle.ID.Generation == Slots[Index].Generation) {
-            Atomic_Store(&Slots[Index].Generation, Atomic_Load(&Slots[Index].Generation)+1);
-            
+        if(Handle.ID.Generation.Value == Slots[Index].Generation.Value) {
+            Slots[Index].Generation.Value = Slots[Index].Generation.Value+1;
+
             Atomic_Fence_Rel();
             
-            FreeIndices.Push(Atomic_Load(&Slots[Index].Index));
-#ifdef ASYNC_SLOT_MAP_STATS
+            FreeIndices.Push(Slots[Index].Index.Value);
+#ifdef DEBUG_BUILD
             Atomic_Increment(&Stats.FreedCount);
 #endif
         }

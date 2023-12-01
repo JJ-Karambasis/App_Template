@@ -90,7 +90,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <DisableSpecificWarnings>4061;4100;4189;4191;4201;4244;4265;4365;4388;4389;4505;4582;4623;4625;4626;4668;4774;4820;5204;5026;5027;5039;5045;5204;5262;26495</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4061;4100;4189;4191;4201;4244;4265;4365;4388;4389;4505;4582;4623;4625;4626;4668;4710;4711;4774;4820;5204;5026;5027;5039;5045;5204;5262;26495</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -110,7 +110,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <DisableSpecificWarnings>4061;4100;4189;4191;4201;4244;4265;4365;4388;4389;4505;4582;4623;4625;4626;4668;4774;4820;5204;5026;5027;5039;5045;5204;5262;26495</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4061;4100;4189;4191;4201;4244;4265;4365;4388;4389;4505;4582;4623;4625;4626;4668;4710;4711;4774;4820;5204;5026;5027;5039;5045;5204;5262;26495</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -130,7 +130,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <DisableSpecificWarnings>4061;4100;4189;4191;4201;4244;4265;4365;4388;4389;4505;4582;4623;4625;4626;4668;4774;4820;5204;5026;5027;5039;5045;5204;5262;26495</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4061;4100;4189;4191;4201;4244;4265;4365;4388;4389;4505;4582;4623;4625;4626;4668;4710;4711;4774;4820;5204;5026;5027;5039;5045;5204;5262;26495</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,7 +150,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <DisableSpecificWarnings>4061;4100;4189;4191;4201;4244;4265;4365;4388;4389;4505;4582;4623;4625;4626;4668;4774;4820;5204;5026;5027;5039;5045;5204;5262;26495</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4061;4100;4189;4191;4201;4244;4265;4365;4388;4389;4505;4582;4623;4625;4626;4668;4710;4711;4774;4820;5204;5026;5027;5039;5045;5204;5262;26495</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

@@ -1,7 +1,7 @@
 #include "win32_app.h"
 #include "win32_shared.cpp"
 
-static atom32 G_Running;
+static std::atomic_bool G_Running;
 
 static s32 Win32_Audio_Thread(thread_context* ThreadContext) {
 
@@ -30,7 +30,7 @@ static s32 Win32_Audio_Thread(thread_context* ThreadContext) {
     CurrentPosition = LastWriteCursor;
     u32 SamplesPerFrame = Ceil_U32((f64)SOUND_SAMPLES_PER_SEC*WIN32_SOUND_HZ);
 
-    while(Atomic_Load(&G_Running)) {
+    while(G_Running.load(std::memory_order_relaxed)) {
         u64 StartCounter = Get_Performance_Counter();
 
         DWORD WriteCursor;
@@ -177,7 +177,7 @@ static LRESULT CALLBACK Win32_Event_Proc(HWND Window, UINT Message, WPARAM WPara
 }
 
 static void Win32_Finish() {
-    Atomic_Store(&G_Running, false);
+    G_Running.store(false, std::memory_order_relaxed);
     thread_manager::Wait_All();
 }
 
@@ -266,7 +266,7 @@ static int Win32_Run(HINSTANCE Instance) {
 
 int WINAPI WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CmdLine, int CmdShow) {
     core::Create();
-    Atomic_Store(&G_Running, true);
+    G_Running.store(true);
 
     __try {
         return Win32_Run(Instance);

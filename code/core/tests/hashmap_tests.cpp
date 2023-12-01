@@ -32,6 +32,6 @@ TEST(HashmapTest, Hashmap) {
 
     TestMap.Release();
 
-    // ASSERT_EQ(BaseAllocator.CurrentAllocated.Value == 0);
-    // ASSERT_EQ(BaseAllocator.TotalAllocated.Value == BaseAllocator.TotalFreed.Value);
+    ASSERT_EQ(BaseAllocator.CurrentAllocated, 0);
+    ASSERT_EQ(BaseAllocator.TotalAllocated, BaseAllocator.TotalFreed);
 }

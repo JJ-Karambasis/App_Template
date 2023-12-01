@@ -111,6 +111,7 @@
 #include <float.h>
 #include <math.h>
 #include <string.h>
+#include <atomic>
 
 #include "types.h"
 #include "memory.h"

@@ -8,7 +8,7 @@
             "type": "shell",
             "windows": {
                 "command": "${workspaceFolder}/build/build.bat win32",
-                "problemMatcher": "$msCompile",
+                "problemMatcher": "$msCompile"
             },
             "group": {
                 "kind": "build",
